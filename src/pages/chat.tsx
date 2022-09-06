@@ -358,7 +358,7 @@ export default function Chat() {
 		}
 	}, [logs]);
 
-	function connect(): void {
+	async function connect() {
 		if (socket) {
 			if (disconnecting) {
 				alert("Be patient I'm tryna disconnect");
@@ -370,6 +370,7 @@ export default function Chat() {
 		} else {
 			const { location } = window;
 
+			await fetch("/api/transfer_cookie");
 			const proto = location.protocol.startsWith("https") ? "wss" : "ws";
 			// const wsUri = `${proto}://localhost:8080/ws`;
 			const wsUri = `${proto}://https://flettex-backend.fly.dev/ws`;
