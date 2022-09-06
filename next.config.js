@@ -3,22 +3,22 @@ const nextConfig = {
 	reactStrictMode: true,
 	async rewrites() {
 		return [
-            {
-                source: '/api/:path*',
-                destination: `http://localhost:8080/:path*`,
-            },
-			{
-			  source: '/api/:path*/',
-			  destination: `http://localhost:8080/:path*/`,
-			},
+            // {
+            //     source: '/api/:path*',
+            //     destination: `http://localhost:8080/:path*`,
+            // },
 			// {
-			// 	source: '/api/:path*',
-			// 	destination: 'https://flettex-backend.fly.dev/:path*'
+			//   source: '/api/:path*/',
+			//   destination: `http://localhost:8080/:path*/`,
 			// },
-			// {
-			// 	source: '/api/:path*/',
-			// 	destination: 'https://flettex-backend.fly.dev/:path*/'
-			// }
+			{
+				source: '/api/:path*',
+				destination: 'https://flettex-backend.fly.dev/:path*'
+			},
+			{
+				source: '/api/:path*/',
+				destination: 'https://flettex-backend.fly.dev/:path*/'
+			}
 			// {
 			// 	source: "/api/:path*/",
 			// 	destination: `https://flettex-chat.up.railway.app/:path*/`,

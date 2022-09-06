@@ -17,7 +17,7 @@ export default function Signup() {
         <>
             <form id="frm" onSubmit={(e) => {
                 e.preventDefault();
-                fetch("/signup", {
+                fetch("/api/signup", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
