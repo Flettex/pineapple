@@ -183,11 +183,15 @@ export default function Chat() {
 								members: [...newGuilds[found].members, event.data.member]
 							}
 						} else {
-							newGuilds.push(event.data.guild);
+							console.log("omg!11! new??");
+							newGuilds.push({
+								...event.data.guild,
+								members: []
+							});
 						}
 						return {
 							user: usrd.user,
-							guilds: [...(usrd.guilds as IGuild[])]
+							guilds: newGuilds
 						}
 					});
 				} else if (event.type === "MemberRemove") {
@@ -372,8 +376,8 @@ export default function Chat() {
 
 			// await fetch("/api/samesite");
 			const proto = location.protocol.startsWith("https") ? "wss" : "ws";
-			// const wsUri = `${proto}://localhost:8080/ws`;
-			const wsUri = `${proto}://flettex-backend.fly.dev/ws`;
+			const wsUri = `${proto}://localhost:8080/ws`;
+			// const wsUri = `${proto}://flettex-backend.fly.dev/ws`;
 
 			log(sysmsg("Connecting...", channel.id));
 			let websocket = new WebSocket(wsUri);

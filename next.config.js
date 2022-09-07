@@ -3,26 +3,26 @@ const nextConfig = {
 	reactStrictMode: true,
 	async redirects() {
 		return [
-			// {
-            //     source: '/api/:path*',
-            //     destination: `http://localhost:8080/:path*`,
-			// 	permanent: true
-            // },
-			// {
-			// 	source: '/api/:path*/',
-			// 	destination: `http://localhost:8080/:path*/`,
-			// 	permanent: true
-			// },
 			{
-				source: '/api/:path*',
-				destination: 'https://flettex-backend.fly.dev/:path*',
+                source: '/api/:path*',
+                destination: `http://localhost:8080/:path*`,
 				permanent: true
-			},
+            },
 			{
 				source: '/api/:path*/',
-				destination: 'https://flettex-backend.fly.dev/:path*/',
+				destination: `http://localhost:8080/:path*/`,
 				permanent: true
-			}
+			},
+			// {
+			// 	source: '/api/:path*',
+			// 	destination: 'https://flettex-backend.fly.dev/:path*',
+			// 	permanent: true
+			// },
+			// {
+			// 	source: '/api/:path*/',
+			// 	destination: 'https://flettex-backend.fly.dev/:path*/',
+			// 	permanent: true
+			// }
 		];
 	},
 	// async rewrites() {
