@@ -508,7 +508,7 @@ export default function Chat() {
 							type: "MessageCreate",
 							data: {
 								content: text,
-								channel_id: uuid.parse(channel.id),
+								channel_id: channel.id,
 								nonce: uuid.parse(nonce)
 							},
 						})
