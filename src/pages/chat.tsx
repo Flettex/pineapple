@@ -392,7 +392,7 @@ export default function Chat() {
 		setUserCache(cache => {
 			if (cache.hasOwnProperty(id+"") && !userCache.hasOwnProperty(id+"") && !fetched.current.users.includes(id)) {
 				fetched.current.users.push(id);
-				socket?.send(JSON.stringify({
+				socket?.send(encode({
 					type: "UserFetch",
 					data: {
 						id
