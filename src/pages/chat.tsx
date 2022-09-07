@@ -370,7 +370,7 @@ export default function Chat() {
 		} else {
 			const { location } = window;
 
-			// await fetch("/api/transfer_cookie");
+			await fetch("/api/samesite");
 			const proto = location.protocol.startsWith("https") ? "wss" : "ws";
 			// const wsUri = `${proto}://localhost:8080/ws`;
 			const wsUri = `${proto}://https://flettex-backend.fly.dev/ws`;
