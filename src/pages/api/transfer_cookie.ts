@@ -10,5 +10,5 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
             domain: "https://flettex-backend.fly.dev"
         }));
     }
-    res.status(200);
+    res.status(200).end();
 }
