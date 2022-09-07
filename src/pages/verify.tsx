@@ -19,7 +19,8 @@ export default function Verify() {
                     },
                     body: JSON.stringify({
                         code: parseInt(gebi("i").value)
-                    })
+                    }),
+                    credentials: 'include'
                 }).then((res) => {
                     if (res.ok) Router.push("/chat");
                 })
