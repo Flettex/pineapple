@@ -370,10 +370,10 @@ export default function Chat() {
 		} else {
 			const { location } = window;
 
-			await fetch("/api/samesite");
+			// await fetch("/api/samesite");
 			const proto = location.protocol.startsWith("https") ? "wss" : "ws";
-			// const wsUri = `${proto}://localhost:8080/ws`;
-			const wsUri = `${proto}://flettex-backend.fly.dev/ws`;
+			const wsUri = `${proto}://localhost:8080/ws`;
+			// const wsUri = `${proto}://flettex-backend.fly.dev/ws`;
 
 			log(sysmsg("Connecting...", channel.id));
 			let websocket = new WebSocket(wsUri);
