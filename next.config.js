@@ -5,11 +5,13 @@ const nextConfig = {
 		return [
 			{
 				source: '/api/:path*',
-				destination: 'https://flettex-backend.fly.dev/:path*'
+				destination: 'https://flettex-backend.fly.dev/:path*',
+				permanent: true
 			},
 			{
 				source: '/api/:path*/',
-				destination: 'https://flettex-backend.fly.dev/:path*/'
+				destination: 'https://flettex-backend.fly.dev/:path*/',
+				permanent: true
 			}
 		];
 	},
