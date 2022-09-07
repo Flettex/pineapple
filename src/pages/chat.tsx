@@ -265,7 +265,7 @@ export default function Chat() {
 				} else if (event.type === "Messages") {
 					setLogs((logs) => ({
 						...logs,
-						[event.data.channel_id]: event.data.messages.map((m: any) => {
+						[event.data.channel_id]: [...(event.data.channel_id || []), event.data.messages.map((m: any) => {
 							// console.log("AUTHOR_ID:", m.author_id);
 							return {
 								id: m.id,
@@ -281,7 +281,7 @@ export default function Chat() {
 									id: BigInt(m.author_id)
 								}][1]
 							}
-						})
+						})]
 					}));
 				} else if (event.type === "Members") {
 					setUserData(usrd => {
