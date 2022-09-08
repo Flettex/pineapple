@@ -375,9 +375,9 @@ export default function Chat() {
 			const { location } = window;
 
 			// await fetch("/api/samesite");
-			const proto = location.protocol.startsWith("https") ? "wss" : "ws";
-			// const wsUri = `${proto}://localhost:8080/ws`;
-			const wsUri = `${proto}://flettex-backend.fly.dev/ws`;
+			// const proto = location.protocol.startsWith("https") ? "wss" : "ws";
+			// const wsUri = "ws://localhost:8080/ws";
+			const wsUri = "wss://flettex-backend.fly.dev/ws";
 
 			log(sysmsg("Connecting...", channel.id));
 			let websocket = new WebSocket(wsUri);
@@ -470,6 +470,7 @@ export default function Chat() {
 			
 					border: "1px solid black"
 				}}>{logs[channel.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? ((i as any).received ? undefined : "gray") : undefined}} onDoubleClick={() => {
+					if (i.author.id !== BigInt(userData?.user.id as bigint /*  actually number*/) || i.channel_id == MAIN_CHANNEL.id) return;
 					const inp = prompt("New content");
 					if (!inp) return;
 					socket?.send(
