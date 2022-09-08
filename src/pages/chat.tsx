@@ -265,7 +265,7 @@ export default function Chat() {
 				} else if (event.type === "Messages") {
 					setLogs((logs) => ({
 						...logs,
-						[event.data.channel_id]: [...(event.data.channel_id || []), ...event.data.messages.map((m: any) => {
+						[event.data.channel_id]: [...(logs[event.data.channel_id] || []), ...event.data.messages.map((m: any) => {
 							// console.log("AUTHOR_ID:", m.author_id);
 							return {
 								id: m.id,
