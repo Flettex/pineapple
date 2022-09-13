@@ -180,10 +180,13 @@ export default function Chat() {
 						if (found !== -1) {
 							newGuilds[found] = {
 								...newGuilds[found],
-								members: [...newGuilds[found].members, event.data.member]
+								members: [...newGuilds[found].members, {
+									...event.data.member,
+									user_id: BigInt(event.data.member.user_id)
+								}]
 							}
 						} else {
-							console.log("omg!11! new??");
+							// console.log("omg!11! new??");
 							newGuilds.push({
 								...event.data.guild,
 								members: []
@@ -249,7 +252,10 @@ export default function Chat() {
 					}));
 				} else if (event.type === "ReadyEvent") {
 					setUserData({
-						user: event.data.user,
+						user: {
+							...event.data.user,
+							id: BigInt(event.data.user.id)
+						},
 						guilds: event.data.guilds.map((g: IGuild) => {
 							// console.log(g.id, stringify(g.id as any));
 							return {
@@ -290,7 +296,10 @@ export default function Chat() {
 						if (found !== -1) {
 							newGuilds[found] = {
 								...newGuilds[found],
-								members: [...newGuilds[found].members, ...event.data.members]
+								members: [...newGuilds[found].members, ...event.data.members.map((m: any) => ({
+									...m,
+									user_id: BigInt(m.user_id)
+								}))]
 							}
 						} else {
 							throw new Error("Bro wtf receiving members event before the guild initialized dude what");
@@ -372,7 +381,7 @@ export default function Chat() {
 			log(sysmsg("Disconnecting...", channel.id));
 			socket.close();
 		} else {
-			const { location } = window;
+			// const { location } = window;
 
 			// await fetch("/api/samesite");
 			// const proto = location.protocol.startsWith("https") ? "wss" : "ws";
@@ -613,6 +622,11 @@ export default function Chat() {
 
 								let guild_id = (document.getElementById("guildid") as HTMLInputElement).value;
 			
+								if (userData?.guilds.find((g) => g.id === guild_id)) {
+									alert("You dumb bruh you already joined in");
+									return;
+								}
+
 								log(sysmsg("Joining guild: " + guild_id, channel.id));
 								socket.send(
 									encode({

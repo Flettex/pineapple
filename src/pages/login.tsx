@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
 import useSWR from 'swr';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 //(props: InferGetServerSidePropsType<typeof getServerSideProps>
 
@@ -40,6 +41,10 @@ export default function Login() {
                 <input id="p" type="password" placeholder="Type a password" required />
                 <input id="captcha" type="text" placeholder="captcha" required />
                 { data && <Image src={data} alt="captcha" width="130" height="50" />}
+                <HCaptcha
+                    sitekey="b06e23a9-c61e-485e-a472-4b7d2e8077d2"
+                    onVerify={(token,ekey) => console.log(token, ekey)}
+                />
                 <button type="submit">Submit</button>
             </form>
         </>
