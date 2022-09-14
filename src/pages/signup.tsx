@@ -1,18 +1,18 @@
 // import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-// import Image from "next/image";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-// import useSWR from 'swr';
+import useSWR from 'swr';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 //(props: InferGetServerSidePropsType<typeof getServerSideProps>
 
-// const fetcher = (url: string) => fetch(url, {
-//     credentials: 'include'
-// }).then(r => r.text());
+const fetcher = (url: string) => fetch(url, {
+    credentials: 'include'
+}).then(r => r.text());
 
 export default function Signup() {
-    // const { data } = useSWR("/api/signup", fetcher);
+    const { data } = useSWR("/api/signup", fetcher);
     const [verified, setVerified] = useState<boolean>(false);
     const Router = useRouter();
     function gebi(id: string): HTMLInputElement {
@@ -21,6 +21,10 @@ export default function Signup() {
     return (
         <>
             <form id="frm" onSubmit={(e) => {
+                if (!verified) {
+                    alert("Do the captcha bruh");
+                    return;
+                }
                 e.preventDefault();
                 fetch("/api/signup", {
                     method: "POST",
@@ -44,6 +48,7 @@ export default function Signup() {
                 <input id="e" type="email" placeholder="Type an email" required />
                 <input id="p" type="password" placeholder="Type a password" required />
                 <input id="captcha" type="text" placeholder="captcha" required />
+                { data && <Image src={data} alt="captcha" width="130" height="50" />}
                 <HCaptcha
                     sitekey="b06e23a9-c61e-485e-a472-4b7d2e8077d2"
                     onVerify={_ => setVerified(true)}
