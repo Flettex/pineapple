@@ -21,7 +21,7 @@ export default function Login() {
     return (
         <>
             <form id="frm" onSubmit={(e) => {
-                if (!verified) {
+                if (!verified && process.env.NODE_ENV === "production") {
                     alert("Do the captcha bruh");
                     return;
                 }
