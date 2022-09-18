@@ -1,4 +1,9 @@
+import { TextField, Text, Grid } from "@modulz/design-system";
 import Link from "next/link";
+import CheckboxDemo from "../components/checkbox";
+import DialogDemo from "../components/dialog";
+import PopoverDemo from "../components/popover";
+import TabsDemo from "../components/tab";
 // import { ButtonGroup, Button } from "../components/button";
 // import { Checkbox } from "../components/checkbox";
 // import { Popover, PopoverContent, PopoverTrigger } from "../components/popover";
@@ -8,6 +13,19 @@ export default function Home() {
     globalStyles();
     return (
         <>
+            {/* <PopoverDemo />
+            <CheckboxDemo />
+            <DialogDemo />
+            <TabsDemo />
+            <Grid
+                align="center"
+                css={{ gridTemplateColumns: 'auto 1fr', columnGap: '$5', rowGap: '$1', mb: '$2' }}
+            >
+                <Text size="1">Name</Text>
+                <TextField defaultValue="" />
+                <Text size="1">Username</Text>
+                <TextField defaultValue="" />
+            </Grid> */}
             <h1>
                 {"Welcome to extremely low budget chat app."}
                 {"We are open source and non-profit"}

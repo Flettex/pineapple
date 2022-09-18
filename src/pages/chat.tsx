@@ -1,10 +1,14 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Box } from "../components/box";
-import { Button } from "../components/button";
+import { Button, ButtonGroup } from "../components/button";
 import { Modal, ModalBody, ModalField, ModalTrigger } from "../components/modal";
 import * as uuid from 'uuid';
 import { encode, decode } from 'cbor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/tab";
+import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogTitle, DialogClose } from "../components/dialog";
+import { IconButton } from "@modulz/design-system";
+import { Cross2Icon } from "@radix-ui/react-icons";
 interface IMessage {
 	id: string,
 	content: string,
@@ -68,14 +72,6 @@ interface IUserData {
 	guilds: IGuild[]
 }
 
-const MAIN_GUILD: IGuild = {
-	id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
-	name: "Main",
-	created_at: 0,
-	creator_id: -1,
-	channels: [],
-	members: []
-}
 
 const MAIN_CHANNEL: IChannel = {
 	id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
@@ -83,6 +79,15 @@ const MAIN_CHANNEL: IChannel = {
 	position: -1,
 	created_at: 0,
 	guild_id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce"
+}
+
+const MAIN_GUILD: IGuild = {
+	id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
+	name: "Main",
+	created_at: 0,
+	creator_id: -1,
+	channels: [MAIN_CHANNEL],
+	members: []
 }
 
 const SYSTEM_AUTHOR: IUser = {
@@ -128,7 +133,6 @@ export default function Chat() {
 	});
 	const [guild, setGuild] = useState<IGuild>(MAIN_GUILD);
     const [channel, setChannel] = useState<IChannel>(MAIN_CHANNEL);
-	const logRef = useRef<HTMLDivElement | null>(null);
 	const statusRef = useRef<HTMLSpanElement | null>(null);
 	const textInputRef = useRef<HTMLInputElement | null>(null);
 	const nameRef = useRef<HTMLInputElement | null>(null);
@@ -214,15 +218,15 @@ export default function Chat() {
 						}
 					});
 				} else if (event.type === "MessageCreate") {
+					// console.log(event.data);
 					// console.log(JSON.stringify(event.data.author), userData?.user.id);
-					if (event.data.author.id === userData?.user.id) {
+					if (event.data.author.id === Number(userData?.user.id || -1)) {
 						setLogs(logs => {
 							// find the message with the nonce
 							return {
 								...logs,
 								[event.data.channel_id]: [...(logs[event.data.channel_id] ?? [])].map((m) => {
 									if (m.nonce === event.data.nonce) {
-										event.data.received = true;
 										return event.data;
 									}
 									return m;
@@ -365,12 +369,6 @@ export default function Chat() {
 		}
 	}, [guild]);
 
-	useEffect(() => {
-		if (logRef.current) {
-			logRef.current.scrollTop += 1000;
-		}
-	}, [logs]);
-
 	async function connect() {
 		if (socket) {
 			if (disconnecting) {
@@ -438,65 +436,81 @@ export default function Chat() {
 			</div>
 
 			<div>{JSON.stringify(userCache[1])}</div>
-
-			<Box css={{
-				display: 'flex',
-				flexDirection: 'row'
-			}}>
-				<div>
-					<div onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]} style={{"border": "1px solid black"}}>Main</div>
+			<Box css={{}}>
+				<Tabs defaultValue={MAIN_CHANNEL.id} orientation="horizontal">
+					<TabsList aria-label="choose a guild">
+						<TabsTrigger value={MAIN_CHANNEL.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
+						{
+							userData && userData.guilds.map((g) => (
+								<TabsTrigger
+									key={g.id}
+									value={g.id}
+									onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
+								>
+									{g.icon ? <Image src={g.icon} alt={g.name} width={50} height={50} /> : g.name}
+								</TabsTrigger>
+							))
+						}
+					</TabsList>
+					<TabsContent value={MAIN_CHANNEL.id}>
+						{logs[MAIN_CHANNEL.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
+						{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>)}
+					</TabsContent>
 					{
 						userData && userData.guilds.map((g) => (
-							<div
+							<TabsContent
 								key={g.id}
+								value={g.id}
 								onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
-								style={{"border": "1px solid black"}}
 							>
-								{g.icon ? <Image src={g.icon} alt={g.name} width={50} height={50} /> : g.name}
-							</div>
+								<Box css={{}}>
+									<Tabs defaultValue={g.channels?.[0].id} orientation="horizontal">
+										<TabsList aria-label="choose a guild">
+											{
+												userData && userData.guilds.find((g) => g.id === guild.id)?.channels?.map((c) => (
+													<TabsTrigger
+														value={c.id}
+														key={c.id}
+														onClick={() => setChannel(c)}
+													>
+														{c.name}
+													</TabsTrigger>
+												))
+											}
+										</TabsList>
+										{
+											Object.entries(logs).map(([k, m]: [string, IMessage[]]) => (
+												<TabsContent
+													key={k}
+													value={k}
+												>
+													{
+														m.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}} onDoubleClick={() => {
+																if (i.author.id !== BigInt(userData?.user.id as bigint) || i.channel_id == MAIN_CHANNEL.id) return;
+																const inp = prompt("New content");
+																if (!inp) return;
+																socket?.send(
+																	encode({
+																		type: "MessageUpdate",
+																		data: {
+																			id: uuid.parse(i.id),
+																			content: inp,
+																			nonce: uuid.parse(i.nonce || MAIN_GUILD.id)
+																		},
+																	})
+																);
+															}}>{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>
+														)
+													}
+												</TabsContent>
+											))
+										}
+									</Tabs>
+								</Box>
+							</TabsContent>
 						))
 					}
-				</div>
-				<div>
-					{
-						userData && userData.guilds.find((g) => g.id === guild.id)?.channels?.map((c) => (
-							<div
-							
-								key={c.id}
-								onClick={() => setChannel(c)}
-								style={{"border": "1px solid black"}}
-							>
-								{c.name}
-							</div>
-						))
-					}
-				</div>
-				<div ref={logRef} style={{
-					width: "30em",
-					height: "20em",
-					overflow: "auto",
-					// margin: "0.5em 0",
-			
-					border: "1px solid black"
-				}}>{logs[channel.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? ((i as any).received ? undefined : "gray") : undefined}} onDoubleClick={() => {
-					if (i.author.id !== BigInt(userData?.user.id as bigint /*  actually number*/) || i.channel_id == MAIN_CHANNEL.id) return;
-					const inp = prompt("New content");
-					if (!inp) return;
-					socket?.send(
-						JSON.stringify({
-							type: "MessageUpdate",
-							data: {
-								id: i.id,
-								content: inp,
-								nonce: i.nonce || MAIN_GUILD.id
-							},
-						}, (_, value) => {
-							return typeof value === 'bigint'
-								? value.toString().replaceAll('"', '')
-								: value // return everything else unchanged
-						})
-					);
-				}}>{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>)}</div>
+				</Tabs>
 			</Box>
 			<form
 				onSubmit={(ev) => {
@@ -509,7 +523,7 @@ export default function Chat() {
 					const nonce = uuid.v4();
 
 					log({
-						id: "",
+						id: "NOT_RECEIVED",
 						content: text,
 						created_at: Date.now(),
 						edited_at: Date.now(),
@@ -535,10 +549,16 @@ export default function Chat() {
 				<input type="text" ref={textInputRef} />
 				<Button type="submit">Submit</Button>
 			</form>
-			<Modal>
-				<ModalTrigger>Trigger Guild</ModalTrigger>
-				<ModalBody>
-					<ModalField>
+			<ButtonGroup>
+				<Dialog>
+					<DialogTrigger asChild>
+					<Button>Create Guild</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogTitle>Create a new guild/server</DialogTitle>
+						<DialogDescription>
+							You can create a new guild/server
+						</DialogDescription>
 						<form
 							onSubmit={(ev) => {
 								ev.preventDefault();
@@ -565,16 +585,24 @@ export default function Chat() {
 							Description?<input type="text" id="d" />
 							<br />
 							Icon?<input type="text" id="ic" />
-							<Button type="submit">Submit</Button>
+							<DialogClose><Button type="submit">Submit</Button></DialogClose>
 						</form>
-						<ModalTrigger>Close</ModalTrigger>
-					</ModalField>
-				</ModalBody>
-			</Modal>
-			<Modal>
-				<ModalTrigger>Trigger Channel</ModalTrigger>
-				<ModalBody>
-					<ModalField>
+						<DialogClose asChild>
+							<IconButton aria-label="Close">
+							<Cross2Icon />
+							</IconButton>
+						</DialogClose>
+					</DialogContent>
+				</Dialog>
+				<Dialog>
+					<DialogTrigger asChild>
+					<Button>Create Channel</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogTitle>Create a Channel for your guild/server</DialogTitle>
+						<DialogDescription>
+							You can create a text channel for your guild/server... even if you are not creator.
+						</DialogDescription>
 						<form
 							onSubmit={(ev) => {
 								ev.preventDefault();
@@ -606,14 +634,22 @@ export default function Chat() {
 							Guild Id<input type="text" id="gid" />
 							<Button type="submit">Submit</Button>
 						</form>
-						<ModalTrigger>Close</ModalTrigger>
-					</ModalField>
-				</ModalBody>
-			</Modal>
-			<Modal>
-				<ModalTrigger>Trigger Join Guild</ModalTrigger>
-				<ModalBody>
-					<ModalField>
+						<DialogClose asChild>
+							<IconButton aria-label="Close">
+							<Cross2Icon />
+							</IconButton>
+						</DialogClose>
+					</DialogContent>
+				</Dialog>
+				<Dialog>
+					<DialogTrigger asChild>
+					<Button>Join Guild (BETA)</Button>
+					</DialogTrigger>
+					<DialogContent>
+						<DialogTitle>Join a guild/server (BETA)</DialogTitle>
+						<DialogDescription>
+							Join a guild/server created by your friend! Note this feature is new and buggy.
+						</DialogDescription>
 						<form
 							onSubmit={(ev) => {
 								ev.preventDefault();
@@ -639,18 +675,23 @@ export default function Chat() {
 							}}
 						>
 							Guild Id<input type="text" id="guildid" />
-							<Button type="submit">Submit</Button>
+							<DialogClose><Button type="submit">Submit</Button></DialogClose>
 						</form>
-						<ModalTrigger>Close</ModalTrigger>
-					</ModalField>
-				</ModalBody>
-			</Modal>
+						<DialogClose asChild>
+							<IconButton aria-label="Close">
+							<Cross2Icon />
+							</IconButton>
+						</DialogClose>
+					</DialogContent>
+				</Dialog>
+			</ButtonGroup>
 
 			<hr />
 
 			<section>
-				<h2>Commands</h2>
-				<table>
+				<h1>Commands are currently <span style={{color: 'red', display: 'inline-block'}}>DEPRECATED.</span></h1>
+				{/* <h2>Commands</h2> */}
+				{/* <table>
 					<tbody>
 						<tr>
 							<td>
@@ -691,7 +732,7 @@ export default function Chat() {
 							</td>
 						</tr>
 					</tbody>
-				</table>
+				</table> */}
 			</section>
 		</>
 	);
