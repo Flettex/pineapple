@@ -1,18 +1,24 @@
+const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = (phase, { defaultConfig }) => ({
 	reactStrictMode: true,
 	async redirects() {
+		if (phase === PHASE_DEVELOPMENT_SERVER) {
+			return [
+				{
+					source: '/api/:path*',
+					destination: `http://localhost:8080/:path*`,
+					permanent: true
+				},
+				{
+					source: '/api/:path*/',
+					destination: `http://localhost:8080/:path*/`,
+					permanent: true
+				},
+			];
+		}
 		return [
-			// {
-            //     source: '/api/:path*',
-            //     destination: `http://localhost:8080/:path*`,
-			// 	permanent: true
-            // },
-			// {
-			// 	source: '/api/:path*/',
-			// 	destination: `http://localhost:8080/:path*/`,
-			// 	permanent: true
-			// },
 			{
 				source: '/api/:path*',
 				destination: 'https://flettex-backend.fly.dev/:path*',
@@ -78,6 +84,6 @@ const nextConfig = {
 			},
 		];
 	},
-};
+});
 
 module.exports = nextConfig;
