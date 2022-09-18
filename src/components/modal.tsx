@@ -1,5 +1,5 @@
+import { styled } from "@styled";
 import React, { useContext, useState } from "react";
-import { styled } from "../utils/theme";
 import { Box } from "./box";
 import { Button } from "./button";
 
@@ -45,7 +45,7 @@ export const Modal = (props: IModalProps) => {
 export const ModalTrigger = (props: IModalTriggerProps) => {
     const ctx = useContext(ModalContext);
     return (
-        <Button onClick={_ => ctx.setShowing((s: boolean) => !s)}>{props.children}</Button>
+        <Button onClick={(_: any) => ctx.setShowing((s: boolean) => !s)}>{props.children}</Button>
     )
 }
 
@@ -67,7 +67,7 @@ export const ModalBody = (props: IModalBodyProps) => {
                     textAlign: 'center',
                     width: '100vw',
                     height: '100vh',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
                 }}>
                     {props.children}
                 </Box>

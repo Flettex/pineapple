@@ -113,7 +113,6 @@ const Button = styled('button', {
 
 const IconButton = styled('button', {
   all: 'unset',
-  fontFamily: 'inherit',
   borderRadius: '100%',
   height: 25,
   width: 25,

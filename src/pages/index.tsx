@@ -1,4 +1,5 @@
 import { TextField, Text, Grid } from "@modulz/design-system";
+import { globalStyles } from "@styled";
 import Link from "next/link";
 import CheckboxDemo from "../components/checkbox";
 import DialogDemo from "../components/dialog";
@@ -7,7 +8,6 @@ import TabsDemo from "../components/tab";
 // import { ButtonGroup, Button } from "../components/button";
 // import { Checkbox } from "../components/checkbox";
 // import { Popover, PopoverContent, PopoverTrigger } from "../components/popover";
-import { globalStyles } from "../utils/theme";
 
 export default function Home() {
     globalStyles();

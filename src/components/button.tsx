@@ -1,6 +1,6 @@
 import type Stitches from '@stitches/react';
 import React, { useState } from 'react';
-import { styled } from '../utils/theme';
+import { styled } from '@styled';
 import { Box } from './box';
 
 interface IButtonGroupProps {

@@ -1,114 +1,14 @@
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box } from "../components/box";
 import { Button, ButtonGroup } from "../components/button";
-import { Modal, ModalBody, ModalField, ModalTrigger } from "../components/modal";
 import * as uuid from 'uuid';
 import { encode, decode } from 'cbor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/tab";
-import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogTitle, DialogClose } from "../components/dialog";
-import { IconButton } from "@modulz/design-system";
-import { Cross2Icon } from "@radix-ui/react-icons";
-interface IMessage {
-	id: string,
-	content: string,
-	created_at: number,
-	edited_at: number,
-	author: IUser,
-	channel_id: string,
-	nonce?: string,
-}
-
-interface IChannel {
-	id: string, // uuid
-	name: string,
-	description?: string,
-	position: number,
-	created_at: number, // number
-	guild_id: string, // uuid, useless but too lazy to remove it
-}
-
-interface IUser {
-	id: bigint,
-	username: string,
-	profile?: string,
-	created_at: number, // time
-	description?: string,
-	is_staff: boolean,
-	is_superuser: boolean
-}
-
-interface IMember {
-	id: string,
-	nick_name: string | undefined,
-	join_at: number,
-	guild_id: string,
-	user_id: bigint,
-}
-
-interface IGuild {
-	id: string, // uuid
-	name: string,
-	description?: string,
-	icon?: string,
-	created_at: number, // time
-	creator_id: number,
-	channels: IChannel[],
-	members: IMember[]
-}
-
-interface IUserData {
-	user: {
-		id: bigint,
-		username: string,
-		email: string,
-		profile?: string,
-		created_at: number, // time
-		description?: string,
-		allow_login: boolean,
-		is_staff: boolean,
-		is_superuser: boolean
-	},
-	guilds: IGuild[]
-}
-
-
-const MAIN_CHANNEL: IChannel = {
-	id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
-	name: "Main",
-	position: -1,
-	created_at: 0,
-	guild_id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce"
-}
-
-const MAIN_GUILD: IGuild = {
-	id: "5fe9d2ab-2174-4a30-8245-cc5de2563dce",
-	name: "Main",
-	created_at: 0,
-	creator_id: -1,
-	channels: [MAIN_CHANNEL],
-	members: []
-}
-
-const SYSTEM_AUTHOR: IUser = {
-	id: BigInt(0),
-	username: "System",
-	created_at: 1467969011,
-	is_staff: true,
-	is_superuser: true
-}
-
-function sysmsg(content: string, id: string): IMessage {
-	return {
-		id: "",
-		content: content,
-		created_at: 0,
-		edited_at: 0,
-		channel_id: id,
-		author: SYSTEM_AUTHOR,
-		nonce: ""
-	}
-}
+import { SessionContext, sysmsg, IMessage, IChannel, IGuild, IMember, IUser, IUserData, SYSTEM_AUTHOR, MAIN_CHANNEL, MAIN_GUILD } from "src/helper/constants";
+import { ModalGuild } from "src/components/ModalGuild";
+import { ModalChannel } from "src/components/ModalChannel";
+import { ModalJoinGuild } from "src/components/ModalJoinGuild";
 
 export default function Chat() {
 	const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -135,10 +35,6 @@ export default function Chat() {
     const [channel, setChannel] = useState<IChannel>(MAIN_CHANNEL);
 	const statusRef = useRef<HTMLSpanElement | null>(null);
 	const textInputRef = useRef<HTMLInputElement | null>(null);
-	const nameRef = useRef<HTMLInputElement | null>(null);
-	// useEffect(() => {
-	// 	console.log(userData);
-	// }, [userData]);
 	function fix(o: any): object {
 		for (let [k, v] of Object.entries(o)) {
 			if (ArrayBuffer.isView(v)) {
@@ -379,11 +275,6 @@ export default function Chat() {
 			log(sysmsg("Disconnecting...", channel.id));
 			socket.close();
 		} else {
-			// const { location } = window;
-
-			// await fetch("/api/samesite");
-			// const proto = location.protocol.startsWith("https") ? "wss" : "ws";
-			// const wsUri = "ws://localhost:8080/ws";
 			const wsUri = process.env.NODE_ENV === "development" ? "ws://localhost:8080/ws" : "wss://flettex-backend.fly.dev/ws";
 
 			log(sysmsg("Connecting...", channel.id));
@@ -424,7 +315,15 @@ export default function Chat() {
 	}
 
 	return (
-		<>
+		<SessionContext.Provider value={{
+			socket,
+			setSocket,
+			log,
+			channel,
+			setChannel,
+			userData,
+			setUserData
+		}}>
 			<div>
 				<Button onClick={connect}>
 					{socket ? "Disconnect" : "Connect"}
@@ -464,7 +363,7 @@ export default function Chat() {
 								onClick={() => [setGuild(g), setChannel(userData.guilds?.find((gd) => gd.id == g.id)?.channels?.[0] || MAIN_CHANNEL)]}
 							>
 								<Box css={{}}>
-									<Tabs defaultValue={g.channels?.[0].id} orientation="horizontal">
+									<Tabs defaultValue={g.channels?.[0]?.id} orientation="horizontal">
 										<TabsList aria-label="choose a guild">
 											{
 												userData && userData.guilds.find((g) => g.id === guild.id)?.channels?.map((c) => (
@@ -550,140 +449,9 @@ export default function Chat() {
 				<Button type="submit">Submit</Button>
 			</form>
 			<ButtonGroup>
-				<Dialog>
-					<DialogTrigger asChild>
-					<Button>Create Guild</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogTitle>Create a new guild/server</DialogTitle>
-						<DialogDescription>
-							You can create a new guild/server
-						</DialogDescription>
-						<form
-							onSubmit={(ev) => {
-								ev.preventDefault();
-
-								if(!nameRef.current || !socket) return;
-			
-								const name = nameRef.current.value;
-			
-								log(sysmsg("Creating guild: " + name, channel.id));
-								socket.send(
-									encode({
-										type: "GuildCreate",
-										data: {
-											name,
-											description: (document.getElementById("d") as HTMLInputElement).value,
-											icon: (document.getElementById("ic") as HTMLInputElement).value
-										},
-									})
-								);
-							}}
-						>
-							Name<input type="text" ref={nameRef} />
-							<br />
-							Description?<input type="text" id="d" />
-							<br />
-							Icon?<input type="text" id="ic" />
-							<DialogClose><Button type="submit">Submit</Button></DialogClose>
-						</form>
-						<DialogClose asChild>
-							<IconButton aria-label="Close">
-							<Cross2Icon />
-							</IconButton>
-						</DialogClose>
-					</DialogContent>
-				</Dialog>
-				<Dialog>
-					<DialogTrigger asChild>
-					<Button>Create Channel</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogTitle>Create a Channel for your guild/server</DialogTitle>
-						<DialogDescription>
-							You can create a text channel for your guild/server... even if you are not creator.
-						</DialogDescription>
-						<form
-							onSubmit={(ev) => {
-								ev.preventDefault();
-
-								if(!socket) return;
-
-								let name = (document.getElementById("nom") as HTMLInputElement).value;
-			
-								log(sysmsg("Creating channel: " + name, channel.id));
-								socket.send(
-									encode({
-										type: "ChannelCreate",
-										data: {
-											name,
-											description: (document.getElementById("desc") as HTMLInputElement).value,
-											position: +(document.getElementById("pos") as HTMLInputElement).value,
-											guild_id: uuid.parse((document.getElementById("gid") as HTMLInputElement).value)
-										},
-									})
-								);
-							}}
-						>
-							Name<input type="text" id="nom" />
-							<br />
-							Description?<input type="text" id="desc" />
-							<br />
-							Position<input type="number" id="pos" />
-							<br />
-							Guild Id<input type="text" id="gid" />
-							<Button type="submit">Submit</Button>
-						</form>
-						<DialogClose asChild>
-							<IconButton aria-label="Close">
-							<Cross2Icon />
-							</IconButton>
-						</DialogClose>
-					</DialogContent>
-				</Dialog>
-				<Dialog>
-					<DialogTrigger asChild>
-					<Button>Join Guild (BETA)</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogTitle>Join a guild/server (BETA)</DialogTitle>
-						<DialogDescription>
-							Join a guild/server created by your friend! Note this feature is new and buggy.
-						</DialogDescription>
-						<form
-							onSubmit={(ev) => {
-								ev.preventDefault();
-
-								if(!socket) return;
-
-								let guild_id = (document.getElementById("guildid") as HTMLInputElement).value;
-			
-								if (userData?.guilds.find((g) => g.id === guild_id)) {
-									alert("You dumb bruh you already joined in");
-									return;
-								}
-
-								log(sysmsg("Joining guild: " + guild_id, channel.id));
-								socket.send(
-									encode({
-										type: "MemberCreate",
-										data: {
-											guild_id: uuid.parse(guild_id)
-										},
-									})
-								);
-							}}
-						>
-							Guild Id<input type="text" id="guildid" />
-							<DialogClose><Button type="submit">Submit</Button></DialogClose>
-						</form>
-						<DialogClose asChild>
-							<IconButton aria-label="Close">
-							<Cross2Icon />
-							</IconButton>
-						</DialogClose>
-					</DialogContent>
-				</Dialog>
+				<ModalGuild />
+				<ModalChannel />
+				<ModalJoinGuild />
 			</ButtonGroup>
 
 			<hr />
@@ -734,6 +502,6 @@ export default function Chat() {
 					</tbody>
 				</table> */}
 			</section>
-		</>
+		</SessionContext.Provider>
 	);
 }

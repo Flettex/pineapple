@@ -1,8 +1,9 @@
 import React from 'react';
 import { Html, Head, Main, NextScript } from 'next/document';
-import { getCssText } from '../utils/theme';
+import { getCssText, globalStyles } from '@styled';
 
 const Document = () => {
+  globalStyles()
   return (
     <Html lang="en">
       <Head>
