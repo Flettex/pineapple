@@ -1,16 +1,16 @@
-import { TextField, Text, Grid } from "@modulz/design-system";
-import { globalStyles } from "@styled";
+// import { TextField, Text, Grid } from "@modulz/design-system";
+// import { globalStyles } from "@styled";
 import Link from "next/link";
-import CheckboxDemo from "../components/checkbox";
-import DialogDemo from "../components/dialog";
-import PopoverDemo from "../components/popover";
-import TabsDemo from "../components/tab";
+// import CheckboxDemo from "../components/checkbox";
+// import DialogDemo from "../components/dialog";
+// import PopoverDemo from "../components/popover";
+// import TabsDemo from "../components/tab";
 // import { ButtonGroup, Button } from "../components/button";
 // import { Checkbox } from "../components/checkbox";
 // import { Popover, PopoverContent, PopoverTrigger } from "../components/popover";
 
 export default function Home() {
-    globalStyles();
+    // globalStyles();
     return (
         <>
             {/* <PopoverDemo />

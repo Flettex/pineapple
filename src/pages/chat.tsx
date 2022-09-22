@@ -9,6 +9,7 @@ import { SessionContext, sysmsg, IMessage, IChannel, IGuild, IMember, IUser, IUs
 import { ModalGuild } from "src/components/ModalGuild";
 import { ModalChannel } from "src/components/ModalChannel";
 import { ModalJoinGuild } from "src/components/ModalJoinGuild";
+import Table from "src/components/table";
 
 export default function Chat() {
 	const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -58,17 +59,7 @@ export default function Chat() {
 			socket.onmessage = (ev) => {
 				// console.log(ev);
 				const event = decode(ev.data);
-				for (let [k, v] of Object.entries(event.data)) {
-					if (ArrayBuffer.isView(v)) {
-						event.data[k] = uuid.stringify(v as Uint8Array);
-					} else if (typeof v === "object" && !Array.isArray(v) && v !== null) {
-						event.data[k] = fix(v);
-					} else if (Array.isArray(v)) {
-						v.forEach((e, ind) => {
-							event.data[k][ind] = fix(e);
-						});
-					}
-				}
+				event.data = fix(event.data)
 				// console.log(event);
 				// console.log(event.data);
 				// const event = JSON.parse(ev.data);
@@ -336,9 +327,9 @@ export default function Chat() {
 
 			<div>{JSON.stringify(userCache[1])}</div>
 			<Box css={{}}>
-				<Tabs defaultValue={MAIN_CHANNEL.id} orientation="horizontal">
+				<Tabs defaultValue={MAIN_GUILD.id} orientation="horizontal">
 					<TabsList aria-label="choose a guild">
-						<TabsTrigger value={MAIN_CHANNEL.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
+						<TabsTrigger value={MAIN_GUILD.id} onClick={() => [setChannel(MAIN_CHANNEL), setGuild(MAIN_GUILD)]}>Main</TabsTrigger>
 						{
 							userData && userData.guilds.map((g) => (
 								<TabsTrigger
@@ -351,7 +342,7 @@ export default function Chat() {
 							))
 						}
 					</TabsList>
-					<TabsContent value={MAIN_CHANNEL.id}>
+					<TabsContent value={MAIN_GUILD.id}>
 						{logs[MAIN_CHANNEL.id]?.map((i, ind) => <div key={ind} style={{color: i.author.id === userData?.user.id ? (i.id !== "NOT_RECEIVED" ? undefined : "gray") : undefined}}>
 						{(userCache[i.author.id+""] as IUser)?.username}: {i.content} {i.created_at !== i.edited_at && "(edited)"}</div>)}
 					</TabsContent>
@@ -448,6 +439,7 @@ export default function Chat() {
 				<input type="text" ref={textInputRef} />
 				<Button type="submit">Submit</Button>
 			</form>
+	
 			<ButtonGroup>
 				<ModalGuild />
 				<ModalChannel />
@@ -455,53 +447,7 @@ export default function Chat() {
 			</ButtonGroup>
 
 			<hr />
-
-			<section>
-				<h1>Commands are currently <span style={{color: 'red', display: 'inline-block'}}>DEPRECATED.</span></h1>
-				{/* <h2>Commands</h2> */}
-				{/* <table>
-					<tbody>
-						<tr>
-							<td>
-								<code>/list</code>
-							</td>
-							<td>list all available rooms (DEV ONLY)</td>
-						</tr>
-						<tr>
-							<td>
-								<code>/join name</code>
-							</td>
-							<td>
-								<p style={{color: 'red', display: 'inline-block'}}>!deprecated!</p> join room, if room does not exist, create new one
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<code>/leave name</code>
-							</td>
-							<td>
-								<p style={{color: 'red', display: 'inline-block'}}>!deprecated!</p> {"leave room, ignored if you are not a part of the room / room doesn't exist (can't leave main room)"}
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<code>/name name</code>
-							</td>
-							<td>
-							<p style={{color: 'red', display: 'inline-block'}}>!deprecated! removing soon</p> change your global nickname
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<code>some message</code>
-							</td>
-							<td>
-								just string, send message to all peers in same room
-							</td>
-						</tr>
-					</tbody>
-				</table> */}
-			</section>
+			<Table />
 		</SessionContext.Provider>
 	);
 }

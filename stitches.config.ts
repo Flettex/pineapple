@@ -21,50 +21,66 @@ const { css, styled, theme, getCssText } = createStitches({
   },
 });
 
-const globalStyles = globalCss({
-  '*': {
-    margin: 0,
-    padding: 0,
-    boxSizing: 'border-box',
-  },
-  'html, body #__next': {
-    minHeight: '100vh',
+// const globalStyles = globalCss({
+//   '*': {
+//     margin: 0,
+//     padding: 0,
+//     boxSizing: 'border-box',
+//   },
+//   'html, body #__next': {
+//     minHeight: '100vh',
 
-    fontFamily: '$roboto',
-    fontWeight: 400,
+//     fontFamily: '$roboto',
+//     fontWeight: 400,
 
-    backgroundColor: '#fff',
+//     backgroundColor: '#fff',
 
-    width: '100%',
-    height: 'fit-content',
+//     width: '100%',
+//     height: 'fit-content',
+//   },
+//   a: {
+//     color: 'inherit',
+//   },
+//   '@font-face': [
+//     {
+//       fontFamily: 'Roboto',
+//       fontStyle: "normal",
+//       fontWeight: 400,
+//       fontDisplay: "swap",
+//       src: "url(/assets/fonts/Roboto/Roboto.woff2) format('woff2')",
+//     }
+//   ]
+// });
 
-    '@media (max-width: 1024px)': {
-      fontSize: '58%',
-    },
+export { css, styled, theme, getCssText };
 
-    '@media (max-width: 768px)': {
-      fontSize: '54%',
-    },
+export function getGlobalCss() {
+  return `
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  html, body #__next {
+    min-height: 100vh;
 
-    '@media (max-width: 480px)': {
-      fontSize: '48%',
-    },
+    font-family: Roboto;
+    font-weight: 400;
 
-    '@media (max-width: 300px)': {
-      fontSize: '42%',
-    },
-  },
-  a: {
-    color: 'inherit',
-  },
-  '@font-face': [
-    {
-      fontFamily: 'Roboto',
-      fontStyle: "normal",
-      fontWeight: 400,
-      src: "url(/assets/fonts/Roboto/Roboto.woff2) format('woff2')",
-    }
-  ]
-});
+    background-color: #fff;
 
-export { css, styled, globalStyles, theme, getCssText };
+    width: 100%;
+    height: fit-content;
+  }
+  a {
+    color: inherit;
+  }
+  @font-face {
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/fonts/Roboto/Roboto.woff2) format('woff2');
+  }
+  `.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "")
+}

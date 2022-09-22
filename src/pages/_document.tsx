@@ -1,12 +1,13 @@
 import React from 'react';
 import { Html, Head, Main, NextScript } from 'next/document';
-import { getCssText, globalStyles } from '@styled';
+import { getCssText, getGlobalCss } from '@styled';
 
 const Document = () => {
-  globalStyles()
   return (
     <Html lang="en">
       <Head>
+        <link rel="preload" as="font" href="/assets/fonts/Roboto/Roboto.woff2" type="font/woff2" crossOrigin="anonymous" />
+        <style dangerouslySetInnerHTML={{ __html: getGlobalCss() }} />
         <style id="stitches" dangerouslySetInnerHTML={{ __html: getCssText() }} />
       </Head>
       <body>
